@@ -29,8 +29,7 @@ module example_consumer_tb;
   `include "svunit-util.svh"
 
   localparam int COUNT_INIT = 128;
-  logic wrEnable;
-  ByteMask64 wrByteMask;
+  ByteMask64 wrMask;
   C2FChunkPtr wrPtr;
   C2FChunkOffset wrOffset;
   uint64 wrData;
@@ -48,9 +47,9 @@ module example_consumer_tb;
   example_consumer uut(sysClk, wrPtr, rdPtr, dtAck, rdOffset, rdData, csData, csValid, csReset, countInit);
 
   // RAM block to receive CPU->FPGA burst-writes
-  ram_sc_be#(C2F_SIZE_NBITS-3, 8) ram(
+  ram_sc_be#(C2F_SIZE_NBITS-3, 8, 8) ram(
     sysClk,
-    wrEnable, wrByteMask, {wrPtr, wrOffset}, wrData,
+    wrMask, {wrPtr, wrOffset}, wrData,
     {rdPtr, rdOffset}, rdData
   );
 
@@ -66,13 +65,11 @@ module example_consumer_tb;
   end
 
   task doWrite(C2FChunkOffset offset, uint64 data);
-    wrEnable = 1;
-    wrByteMask = '1;
+    wrMask = '1;
     wrOffset = offset;
     wrData = data;
     @(posedge sysClk);
-    wrEnable = 0;
-    wrByteMask = 'X;
+    wrMask = '0;
     wrOffset = 'X;
     wrData = 'X;
   endtask
@@ -90,8 +87,7 @@ module example_consumer_tb;
     `SVTEST(consumer)
       int x;
 
-      wrEnable = 0;
-      wrByteMask = 'X;
+      wrMask = '0;
       wrOffset = 'X;
       wrData = 'X;
       csReset = 0;

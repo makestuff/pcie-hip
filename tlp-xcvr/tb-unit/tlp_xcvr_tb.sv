@@ -62,8 +62,7 @@ module tlp_xcvr_tb;
   assign f2cDataX = (f2cValid && f2cReady) ? f2cData : 'X;
 
   // 64-bit CPU->FPGA burst-pipe
-  logic c2fWrEnable;
-  ByteMask64 c2fWrByteMask;
+  ByteMask64 c2fWrMask;
   C2FChunkPtr c2fWrPtr;
   C2FChunkOffset c2fWrOffset;
   uint64 c2fWrData;
@@ -86,19 +85,19 @@ module tlp_xcvr_tb;
   // Instantiate transciever
   tlp_xcvr uut(
     sysClk, cfgBusDev,
-    rxData, rxValid, rxReady, rxSOP, rxEOP,                                           // CPU->FPGA messages
-    txData, txValid, txReady, txSOP, txEOP,                                           // FPGA->CPU messages
-    cpuChan,                                                                          // register address
-    cpuWrData, cpuWrValid, cpuWrReady,                                                // register write pipe
-    cpuRdData, cpuRdValid, cpuRdReady,                                                // register read pipe
-    f2cData, f2cValid, f2cReady, f2cReset,                                            // FPGA->CPU DMA pipe
-    c2fWrEnable, c2fWrByteMask, c2fWrPtr, c2fWrOffset, c2fWrData, c2fRdPtr, c2fDTAck  // CPU->FPGA burst pipe
+    rxData, rxValid, rxReady, rxSOP, rxEOP,                          // CPU->FPGA messages
+    txData, txValid, txReady, txSOP, txEOP,                          // FPGA->CPU messages
+    cpuChan,                                                         // register address
+    cpuWrData, cpuWrValid, cpuWrReady,                               // register write pipe
+    cpuRdData, cpuRdValid, cpuRdReady,                               // register read pipe
+    f2cData, f2cValid, f2cReady, f2cReset,                           // FPGA->CPU DMA pipe
+    c2fWrMask, c2fWrPtr, c2fWrOffset, c2fWrData, c2fRdPtr, c2fDTAck  // CPU->FPGA burst pipe
   );
 
   // RAM block to receive CPU->FPGA burst-writes
   ram_sc_be#(C2F_SIZE_NBITS-3, 8) c2f_ram(
     sysClk,
-    c2fWrEnable, c2fWrByteMask, {c2fWrPtr, c2fWrOffset}, c2fWrData,
+    c2fWrMask, {c2fWrPtr, c2fWrOffset}, c2fWrData,
     c2fRdAddr, c2fRdData
   );
 

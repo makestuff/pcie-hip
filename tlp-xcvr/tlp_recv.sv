@@ -32,8 +32,7 @@ module tlp_recv(
     output logic actValid_out,
 
     // The memory-mapped CPU->FPGA pipe
-    output logic c2fWrEnable_out,
-    output tlp_xcvr_pkg::ByteMask64 c2fWrByteMask_out,
+    output tlp_xcvr_pkg::ByteMask64 c2fWrMask_out,
     output tlp_xcvr_pkg::C2FChunkPtr c2fWrPtr_out,
     output tlp_xcvr_pkg::C2FChunkOffset c2fWrOffset_out,
     output tlp_xcvr_pkg::uint64 c2fWrData_out,
@@ -125,8 +124,7 @@ module tlp_recv(
     rxReady_out = 1;
 
     // CPU->FPGA DMA pipe
-    c2fWrEnable_out = 0;
-    c2fWrByteMask_out = 'X;
+    c2fWrMask_out = '0;
     c2fWrData_out = 'X;
 
     // Typed messages
@@ -139,7 +137,7 @@ module tlp_recv(
     // Next state logic
     case (state)
       // Host is reading a register
-      S_REG_READ: begin
+      S_REG_READ: begin assert(1);
         rr1 = rxData_in;
         actData_out = genRegRead(ExtChan'(rr1.qwAddr), reqID, tag);
         actValid_out = 1;
@@ -147,12 +145,12 @@ module tlp_recv(
       end
 
       // Host is writing to a register
-      S_REG_WRITE: begin
+      S_REG_WRITE: begin assert(1);
         rw1 = rxData_in;
-        if (ExtChan'(rw1.dwAddr/2) == C2F_WRPTR) begin
+        if (ExtChan'(rw1.dwAddr/2) == C2F_WRPTR) begin assert(1);
           // CPU is giving us a new CPU->FPGA write pointer
           c2fWrPtr_next = C2FChunkPtr'(rw1.data);
-        end else begin
+        end else begin assert(1);
           // Some other register
           actData_out = genRegWrite(ExtChan'(rw1.dwAddr/2), rw1.data);
           actValid_out = 1;
@@ -162,21 +160,20 @@ module tlp_recv(
 
       // Host is doing a burst write to the CPU->FPGA region
       // MAYBE: Verify that chunk being written is the one indexed by the c2fWrPtr register?
-      S_BURST_WRITE1: begin
+      S_BURST_WRITE1: begin assert(1);
         rw1 = rxData_in;
-        if (rw1.dwAddr & 1) begin
+        if (rw1.dwAddr & 1) begin assert(1);
           // The address is odd, therefore the first DW is rw1.data (i.e MSW of rw1)
           c2fWrOffset_out = C2FChunkOffset'(rw1.dwAddr>>1);
-          c2fWrByteMask_out = {firstBE, 4'b0000};
-          c2fWrData_out = maskData64({rw1.data, 32'h0}, c2fWrByteMask_out);
-          c2fWrEnable_out = 1;
-          if (dwCount == 1) begin
+          c2fWrMask_out = {firstBE, 4'b0000};
+          c2fWrData_out = maskData64({rw1.data, 32'h0}, c2fWrMask_out);
+          if (dwCount == 1) begin assert(1);
             // We're done
             dwCount_next = 'X;
             firstBE_next = 'X;
             lastBE_next = 'X;
             state_next = S_IDLE;
-          end else begin
+          end else begin assert(1);
             // There's more data to come
             dwCount_next = DWCount'(dwCount - 1);
             firstBE_next = 'X;
@@ -184,7 +181,7 @@ module tlp_recv(
             c2fWrOffset_next = C2FChunkOffset'((rw1.dwAddr>>1) + 1);
             state_next = S_BURST_WRITE3;  // go straight to the loop state
           end
-        end else begin
+        end else begin assert(1);
           // The address is even, therefore there's no data in rw1
           dwCount_next = dwCount;
           firstBE_next = firstBE;
@@ -195,53 +192,51 @@ module tlp_recv(
       end
 
       // First pair of DWs, with mask
-      S_BURST_WRITE2: begin
-        if (dwCount <= 2) begin
+      S_BURST_WRITE2: begin assert(1);
+        if (dwCount <= 2) begin assert(1);
           // This is the last one or two DWs
-          c2fWrByteMask_out = {
+          c2fWrMask_out = {
             (dwCount==1) ? 4'b0000 : lastBE,
             firstBE
           };
           dwCount_next = 'X;
           lastBE_next = 'X;
           state_next = S_IDLE;
-        end else begin
+        end else begin assert(1);
           // There's more data to come
-          c2fWrByteMask_out = {4'b1111, firstBE};
+          c2fWrMask_out = {4'b1111, firstBE};
           dwCount_next = DWCount'(dwCount - 2);
           lastBE_next = lastBE;
           state_next = S_BURST_WRITE3;
         end
         c2fWrOffset_out = c2fWrOffset;
-        c2fWrData_out = maskData64(rxData_in, c2fWrByteMask_out);
-        c2fWrEnable_out = 1;
+        c2fWrData_out = maskData64(rxData_in, c2fWrMask_out);
         c2fWrOffset_next = C2FChunkOffset'(c2fWrOffset + 1);
       end
 
       // Main loop
-      S_BURST_WRITE3: begin
+      S_BURST_WRITE3: begin assert(1);
         c2fWrOffset_out = c2fWrOffset;
-        c2fWrEnable_out = 1;
-        if (dwCount == 2) begin
+        if (dwCount == 2) begin assert(1);
           // last pair of DWs is in rxData_in
           state_next = S_IDLE;
-          c2fWrByteMask_out = {lastBE, 4'b1111};
-          c2fWrData_out = maskData64(rxData_in, c2fWrByteMask_out);
+          c2fWrMask_out = {lastBE, 4'b1111};
+          c2fWrData_out = maskData64(rxData_in, c2fWrMask_out);
           dwCount_next = 'X;
           firstBE_next = 'X;
           lastBE_next = 'X;
-        end else if (dwCount == 1) begin
+        end else if (dwCount == 1) begin assert(1);
           // last DW is in LSW of rxData_in
           state_next = S_IDLE;
-          c2fWrByteMask_out = {4'b0000, lastBE};
-          c2fWrData_out = maskData64(rxData_in, c2fWrByteMask_out);
+          c2fWrMask_out = {4'b0000, lastBE};
+          c2fWrData_out = maskData64(rxData_in, c2fWrMask_out);
           dwCount_next = 'X;
           firstBE_next = 'X;
           lastBE_next = 'X;
-        end else begin
+        end else begin assert(1);
           // A pair of DWs in rxData_in
           state_next = S_BURST_WRITE3;
-          c2fWrByteMask_out = '1;
+          c2fWrMask_out = '1;
           c2fWrData_out = rxData_in;
           dwCount_next = DWCount'(dwCount - 2);
           c2fWrOffset_next = C2FChunkOffset'(c2fWrOffset + 1);
@@ -250,26 +245,26 @@ module tlp_recv(
       end
 
       // S_IDLE and others
-      default: begin
+      default: begin assert(1);
         hdr = rxData_in;
-        if (rxValid_in && rxSOP_in) begin
+        if (rxValid_in && rxSOP_in) begin assert(1);
           // We have the first two longwords in a new message...
-          if (hdr.fmt == H3DW_WITHDATA && hdr.typ == MEM_RW_REQ) begin
+          if (hdr.fmt == H3DW_WITHDATA && hdr.typ == MEM_RW_REQ) begin assert(1);
             // The CPU is writing to the FPGA
             rw0 = rxData_in;
-            if (rxSOP_in == SOP_C2F) begin
+            if (rxSOP_in == SOP_C2F) begin assert(1);
               // The CPU is writing to the FPGA, in the CPU->FPGA data region. We'll find out the
               // address and data on subsequent cycles
               dwCount_next = rw0.dwCount;
               firstBE_next = rw0.firstBE;
               lastBE_next = rw0.lastBE;
               state_next = S_BURST_WRITE1;
-            end else if (rxSOP_in == SOP_REG && rw0.lastBE == 'h0 && rw0.firstBE == 'hF && rw0.dwCount == 1) begin
+            end else if (rxSOP_in == SOP_REG && rw0.lastBE == 'h0 && rw0.firstBE == 'hF && rw0.dwCount == 1) begin assert(1);
               // The CPU is writing to the FPGA, in the register region. We'll find out the address
               // and data word on the next cycle.
               state_next = S_REG_WRITE;
             end
-          end else if (hdr.fmt == H3DW_NODATA && hdr.typ == MEM_RW_REQ) begin
+          end else if (hdr.fmt == H3DW_NODATA && hdr.typ == MEM_RW_REQ) begin assert(1);
             // The CPU is reading from the FPGA; save the msgID. See fig 2-13 in the PCIe spec: the
             // msgID is a 16-bit requester ID and an 8-bit tag. We'll find out the address on the
             // next cycle.

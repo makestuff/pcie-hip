@@ -190,8 +190,8 @@ module tlp_send(
     // Next state logic
     case (state)
       // Send second QW of completion packet
-      S_READ: begin
-        if (txReady_in) begin
+      S_READ: begin assert(1);
+        if (txReady_in) begin assert(1);
           txData_out = genRegCmp1(.data(rdData), .reqID(reqID), .tag(tag), .lowAddr(lowAddr));
           txValid_out = 1;
           txEOP_out = 1;
@@ -201,8 +201,8 @@ module tlp_send(
       end
 
       // Send first QW of DmaWrite packet
-      S_DMA0: begin
-        if (txReady_in) begin
+      S_DMA0: begin assert(1);
+        if (txReady_in) begin assert(1);
           txData_out = genDmaWrite0(.reqID(cfgBusDev_in), .dwCount(F2C_TLPSIZE/4));
           txValid_out = 1;
           txSOP_out = 1;
@@ -212,8 +212,8 @@ module tlp_send(
       end
 
       // Send second QW of DmaWrite packet
-      S_DMA1: begin
-        if (txReady_in) begin
+      S_DMA1: begin assert(1);
+        if (txReady_in) begin assert(1);
           txData_out = genDmaWrite1(baseAddr);
           txValid_out = 1;
           qwCount_next = '1;  // since QWCount has F2C_TLPSIZE_NBITS-3 bits, this will be F2C_TLPSIZE/8 - 1;
@@ -222,22 +222,22 @@ module tlp_send(
       end
 
       // Send 16 QWs of DmaWrite payload
-      S_DMA2: begin
-        if (txReady_in) begin
+      S_DMA2: begin assert(1);
+        if (txReady_in) begin assert(1);
           txData_out = f2cData_in;
           txValid_out = 1;
           f2cReady_out = 1;  // commit read from DMA pipe
           qwCount_next = QWCount'(qwCount - 1);
-          if (qwCount == 0) begin
+          if (qwCount == 0) begin assert(1);
             qwCount_next = 'X;
             txEOP_out = 1;
             tlpCount_next = TLPCount'(tlpCount - 1);
-            if (F2C_CHUNKSIZE_NBITS == F2C_TLPSIZE_NBITS || tlpCount == 0) begin
+            if (F2C_CHUNKSIZE_NBITS == F2C_TLPSIZE_NBITS || tlpCount == 0) begin assert(1);
               // All TLPs for this chunk have now been sent
               f2cWrPtr_next = F2CChunkPtr'(f2cWrPtr+1);  // increment FPGA->CPU write-pointer
               baseAddr_next = 'X;
               state_next = S_MTR0;
-            end else begin
+            end else begin assert(1);
               // This chunk has another TLP to send
               baseAddr_next = DWAddr'(baseAddr + F2C_TLPSIZE/4);
               state_next = S_DMA0;
@@ -247,20 +247,20 @@ module tlp_send(
       end
 
       // Send the updated f2cWrPtr & c2fRdPtr to the CPU
-      S_MTR0: begin
-        if (txReady_in) begin
+      S_MTR0: begin assert(1);
+        if (txReady_in) begin assert(1);
           state_next = doPtrUpdates();
         end
       end
-      S_MTR1: begin
-        if (txReady_in) begin
+      S_MTR1: begin assert(1);
+        if (txReady_in) begin assert(1);
           txData_out = genDmaWrite1(mtrBase*2);  // metrics buffer
           txValid_out = 1;
           state_next = S_MTR2;
         end
       end
-      S_MTR2: begin
-        if (txReady_in) begin
+      S_MTR2: begin assert(1);
+        if (txReady_in) begin assert(1);
           c2fDTAck_next = 0;
           txData_out = {uint32'(c2fRdPtr), uint32'(f2cWrPtr)};
           txValid_out = 1;
@@ -270,38 +270,39 @@ module tlp_send(
       end
 
       // S_IDLE and others
-      default: begin
-        if (txReady_in && actValid_in && actData_in.typ == ACT_READ)
+      default: begin assert(1);
+        if (txReady_in && actValid_in && actData_in.typ == ACT_READ) begin assert(1);
           state_next = doRegRead();
-        else if (actValid_in && actData_in.typ == ACT_WRITE)
+        end else if (actValid_in && actData_in.typ == ACT_WRITE) begin assert(1);
           state_next = doRegWrite();
-        else if (txReady_in && f2cValid_in && F2CChunkPtr'(f2cWrPtr+1) != f2cRdPtr && f2cEnabled)
+        end else if (txReady_in && f2cValid_in && F2CChunkPtr'(f2cWrPtr+1) != f2cRdPtr && f2cEnabled) begin assert(1);
           state_next = doDmaWrite();
-        else if (txReady_in && actValid_in && actData_in.typ == ACT_ERROR)
+        end else if (txReady_in && actValid_in && actData_in.typ == ACT_ERROR) begin //assert(1); // TODO: improve coverage
           state_next = doErrorCode();
-        else if (txReady_in && (c2fDTAck_in || c2fDTAck))
+        end else if (txReady_in && (c2fDTAck_in || c2fDTAck)) begin //assert(1); // TODO: improve coverage
           state_next = doPtrUpdates();
+        end
       end
     endcase
   end
 
-  function State doRegRead();
+  function State doRegRead(); assert(1);
     // We know it's a register read, but is the source a system or user channel?
     rr = actData_in;
-    if (rr.chan < CTL_BASE) begin
+    if (rr.chan < CTL_BASE) begin assert(1);
       // Reading from a user channel
       cpuChan_out = Channel'(rr.chan);
       cpuRdReady_out = 1;
       return cpuRdValid_in ?
         prepRegCmp(cpuRdData_in) :  // data is available, so send it
         S_IDLE;                     // nope, try again next cycle
-    end else begin
+    end else begin assert(1);
       // Reading from system channels is not defined yet, so just send a recognisable value
       return prepRegCmp(32'hDEADBEEF);
     end
   endfunction
 
-  function State prepRegCmp(Data data);
+  function State prepRegCmp(Data data); assert(1);
     rdData_next = data;
     reqID_next = rr.reqID;
     tag_next = rr.tag;
@@ -313,13 +314,13 @@ module tlp_send(
     return S_READ;
   endfunction
 
-  function State doRegWrite();
+  function State doRegWrite(); assert(1);
     // We know it's a register write, but is the target a system or user channel?
     rw = actData_in;
     return (rw.chan < CTL_BASE) ? doUsrWrite() : doSysWrite();
   endfunction
 
-  function State doUsrWrite();
+  function State doUsrWrite(); assert(1);
     // Writing to a user channel
     cpuChan_out = Channel'(rw.chan);
     cpuWrData_out = rw.data;
@@ -329,36 +330,36 @@ module tlp_send(
     return S_IDLE;
   endfunction
 
-  function State doSysWrite();
+  function State doSysWrite(); assert(1);
     // Writing to a system channel
     actReady_out = 1;  // commit read from action FIFO
-    if (rw.chan == F2C_BASE) begin
+    if (rw.chan == F2C_BASE) begin assert(1);
       // CPU is giving us the base bus-address of the 16xTLP FPGA->CPU circular buffer
       f2cBase_next = QWAddr'(rw.data);
-    end else if (rw.chan == F2C_RDPTR) begin
+    end else if (rw.chan == F2C_RDPTR) begin assert(1);
       // CPU is giving us a new FPGA->CPU read pointer
       f2cRdPtr_next = F2CChunkPtr'(rw.data);
-    end else if (rw.chan == DMA_ENABLE) begin
+    end else if (rw.chan == DMA_ENABLE) begin assert(1);
       // CPU is writing to the control register
-      if (rw.data[0]) begin
+      if (rw.data[0]) begin assert(1);
         // If bit 0 is set, reset everything
         f2cEnabled_next = 0;
         f2cReset_out = 1;
         f2cWrPtr_next = 0;
         f2cRdPtr_next = 0;
         c2fRdPtr_next = 0;
-      end else begin
+      end else begin assert(1);
         // Enable or disable FPGA->CPU DMA based on bit 1
         f2cEnabled_next = rw.data[1];
       end
-    end else if (rw.chan == MTR_BASE) begin
+    end else if (rw.chan == MTR_BASE) begin assert(1);
       // CPU is giving us the base bus-address of the metrics buffer
       mtrBase_next = QWAddr'(rw.data);
     end
     return S_IDLE;
   endfunction
 
-  function State doDmaWrite();
+  function State doDmaWrite(); assert(1);
     // The PCIe bus is ready to accept data, we have data to send, there's space in the
     // FPGA->CPU circular buffer, and DMA send has been enabled
     txData_out = genDmaWrite0(.reqID(cfgBusDev_in), .dwCount(F2C_TLPSIZE/4));

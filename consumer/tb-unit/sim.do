@@ -25,8 +25,7 @@ proc do_test {gui} {
     add wave      dispClk
 
     add wave -div "Write Side"
-    add wave      ram/wrEnable_in
-    add wave      ram/wrByteMask_in
+    add wave      ram/wrMask_in
     add wave -uns ram/wrAddr_in
     add wave -hex ram/wrData_in
 
@@ -48,7 +47,7 @@ proc do_test {gui} {
     add wave -hex uut/ckSum
     add wave -uns uut/count
 
-    gui_run 310 160 0 10 1570 133 1600
+    gui_run 245 125 0 10 1570 133 1600
   } else {
     cli_run
   }

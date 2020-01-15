@@ -63,8 +63,7 @@ proc do_test {gui} {
     add wave      uut/f2cReady_out
 
     add wave -div "CPU->FPGA Burst Pipe"
-    add wave      uut/c2fWrEnable_out
-    add wave      uut/c2fWrByteMask_out
+    add wave      uut/c2fWrMask_out
     add wave -uns uut/c2fWrPtr_out
     add wave -hex uut/c2fWrOffset_out
     add wave -hex uut/c2fWrData_out
