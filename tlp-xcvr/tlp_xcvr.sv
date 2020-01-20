@@ -16,53 +16,53 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-module tlp_xcvr(
+module makestuff_tlp_xcvr(
     // Clock, config & interrupt signals
     input logic pcieClk_in,                  // 125MHz core clock from PCIe PLL
-    input tlp_xcvr_pkg::BusID cfgBusDev_in,  // the device ID assigned to the FPGA on enumeration
+    input makestuff_tlp_xcvr_pkg::BusID cfgBusDev_in,  // the device ID assigned to the FPGA on enumeration
 
     // Incoming messages from the CPU
-    input tlp_xcvr_pkg::uint64 rxData_in,
+    input makestuff_tlp_xcvr_pkg::uint64 rxData_in,
     input logic rxValid_in,
     output logic rxReady_out,
-    input tlp_xcvr_pkg::SopBar rxSOP_in,
+    input makestuff_tlp_xcvr_pkg::SopBar rxSOP_in,
     input logic rxEOP_in,
 
     // Outgoing messages to the CPU
-    output tlp_xcvr_pkg::uint64 txData_out,
+    output makestuff_tlp_xcvr_pkg::uint64 txData_out,
     output logic txValid_out,
     input logic txReady_in,
     output logic txSOP_out,
     output logic txEOP_out,
 
     // Internal read/write interface
-    output tlp_xcvr_pkg::Channel cpuChan_out,
+    output makestuff_tlp_xcvr_pkg::Channel cpuChan_out,
 
-    output tlp_xcvr_pkg::Data cpuWrData_out,  // Host >> FPGA register pipe:
+    output makestuff_tlp_xcvr_pkg::Data cpuWrData_out,  // Host >> FPGA register pipe:
     output logic cpuWrValid_out,
     input logic cpuWrReady_in,
 
-    input tlp_xcvr_pkg::Data cpuRdData_in,    // Host << FPGA register pipe:
+    input makestuff_tlp_xcvr_pkg::Data cpuRdData_in,    // Host << FPGA register pipe:
     input logic cpuRdValid_in,
     output logic cpuRdReady_out,
 
     // Source of FPGA->CPU DMA stream
-    input tlp_xcvr_pkg::uint64 f2cData_in,
+    input makestuff_tlp_xcvr_pkg::uint64 f2cData_in,
     input logic f2cValid_in,
     output logic f2cReady_out,
     output logic f2cReset_out,
 
     // Sink for the memory-mapped CPU->FPGA burst pipe
-    output tlp_xcvr_pkg::ByteMask64 c2fWrMask_out,
-    output tlp_xcvr_pkg::C2FChunkPtr c2fWrPtr_out,
-    output tlp_xcvr_pkg::C2FChunkOffset c2fWrOffset_out,
-    output tlp_xcvr_pkg::uint64 c2fWrData_out,
-    output tlp_xcvr_pkg::C2FChunkPtr c2fRdPtr_out,
+    output makestuff_tlp_xcvr_pkg::ByteMask64 c2fWrMask_out,
+    output makestuff_tlp_xcvr_pkg::C2FChunkPtr c2fWrPtr_out,
+    output makestuff_tlp_xcvr_pkg::C2FChunkOffset c2fWrOffset_out,
+    output makestuff_tlp_xcvr_pkg::uint64 c2fWrData_out,
+    output makestuff_tlp_xcvr_pkg::C2FChunkPtr c2fRdPtr_out,
     input logic c2fDTAck_in
   );
 
   // Get stuff from the associated package
-  import tlp_xcvr_pkg::*;
+  import makestuff_tlp_xcvr_pkg::*;
 
   // Action FIFO
   Action fiData;
@@ -71,7 +71,7 @@ module tlp_xcvr(
   logic foValid;
   logic foReady;
 
-  buffer_fifo#(
+  makestuff_buffer_fifo#(
     .WIDTH           (ACTION_BITS),
     .DEPTH           (3),
     .BLOCK_RAM       (0)
@@ -94,7 +94,7 @@ module tlp_xcvr(
   );
 
   // TLP Receiver
-  tlp_recv recv(
+  makestuff_tlp_recv recv(
     .pcieClk_in         (pcieClk_in),
 
     // Incoming messages from the CPU
@@ -117,7 +117,7 @@ module tlp_xcvr(
   );
 
   // TLP Sender
-  tlp_send send(
+  makestuff_tlp_send send(
     .pcieClk_in      (pcieClk_in),
     .cfgBusDev_in    (cfgBusDev_in),
 

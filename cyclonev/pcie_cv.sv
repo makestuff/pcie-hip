@@ -26,15 +26,15 @@ module pcie_cv(
 
     // Application interface
     output logic pcieClk_out,
-    output tlp_xcvr_pkg::BusID cfgBusDev_out,
+    output makestuff_tlp_xcvr_pkg::BusID cfgBusDev_out,
 
-    output tlp_xcvr_pkg::uint64 rxData_out,
-    output tlp_xcvr_pkg::SopBar rxSOP_out,
+    output makestuff_tlp_xcvr_pkg::uint64 rxData_out,
+    output makestuff_tlp_xcvr_pkg::SopBar rxSOP_out,
     output logic rxEOP_out,
     output logic rxValid_out,
     input logic rxReady_in,
 
-    input tlp_xcvr_pkg::uint64 txData_in,
+    input makestuff_tlp_xcvr_pkg::uint64 txData_in,
     input logic txSOP_in,
     input logic txEOP_in,
     input logic txValid_in,
@@ -143,7 +143,7 @@ module pcie_cv(
   assign cfgBusDev_out[2:0] = 0;
 
   // Small FIFO to avoid rxData being lost because of the two-clock latency from the PCIe IP.
-  buffer_fifo#(
+  makestuff_buffer_fifo#(
     .WIDTH           (67),    // space for 64-bit data word, the EOP flag and the two-bit SOP enum
     .DEPTH           (2),     // space for four entries
     .BLOCK_RAM       (0)      // just use regular registers
@@ -170,7 +170,7 @@ module pcie_cv(
 
   // Most of the FIFO input bits are driven directly from the hard-IP; the SOP enum is derived here
   always_comb begin: assign_sopbar
-    import tlp_xcvr_pkg::*;
+    import makestuff_tlp_xcvr_pkg::*;
     SopBar sopbar;
     if (sop) begin
       if (bar == (1 << REG_BAR))
@@ -187,7 +187,7 @@ module pcie_cv(
 
   // External connection to FIFO output
   assign rxData_out = foData[63:0];
-  assign rxSOP_out = tlp_xcvr_pkg::SopBar'(foData[66:65]);
+  assign rxSOP_out = makestuff_tlp_xcvr_pkg::SopBar'(foData[66:65]);
   assign rxEOP_out = foData[64];
   assign rxValid_out = foValid;
   assign foReady = rxReady_in;
@@ -212,14 +212,14 @@ module pcie_cv(
     .vsec_rev_hwtcl                            (0),
     .user_id_hwtcl                             (0),
     .porttype_func0_hwtcl                      ("Native endpoint"),
-    .bar0_size_mask_0_hwtcl                    (tlp_xcvr_pkg::REG_SIZE_NBITS),
+    .bar0_size_mask_0_hwtcl                    (makestuff_tlp_xcvr_pkg::REG_SIZE_NBITS),
     .bar0_io_space_0_hwtcl                     ("Disabled"),
     .bar0_64bit_mem_space_0_hwtcl              ("Disabled"),
     .bar0_prefetchable_0_hwtcl                 ("Disabled"),
     .bar1_size_mask_0_hwtcl                    (0),
     .bar1_io_space_0_hwtcl                     ("Disabled"),
     .bar1_prefetchable_0_hwtcl                 ("Disabled"),
-    .bar2_size_mask_0_hwtcl                    (tlp_xcvr_pkg::C2F_SIZE_NBITS),
+    .bar2_size_mask_0_hwtcl                    (makestuff_tlp_xcvr_pkg::C2F_SIZE_NBITS),
     .bar2_io_space_0_hwtcl                     ("Disabled"),
     .bar2_64bit_mem_space_0_hwtcl              ("Enabled"),
     .bar2_prefetchable_0_hwtcl                 ("Enabled"),

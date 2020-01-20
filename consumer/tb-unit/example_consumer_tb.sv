@@ -20,7 +20,7 @@
 
 module example_consumer_tb;
 
-  import tlp_xcvr_pkg::*;
+  import makestuff_tlp_xcvr_pkg::*;
 
   localparam int CLK_PERIOD = 10;
   `include "clocking-util.svh"
@@ -44,10 +44,10 @@ module example_consumer_tb;
   C2FChunkPtr rdPtr_next;
 
   // Instantiate example_consumer
-  example_consumer uut(sysClk, wrPtr, rdPtr, dtAck, rdOffset, rdData, csData, csValid, csReset, countInit);
+  makestuff_example_consumer uut(sysClk, wrPtr, rdPtr, dtAck, rdOffset, rdData, csData, csValid, csReset, countInit);
 
   // RAM block to receive CPU->FPGA burst-writes
-  ram_sc_be#(C2F_SIZE_NBITS-3, 8, 8) ram(
+  makestuff_ram_sc_be#(C2F_SIZE_NBITS-3, 8, 8) ram(
     sysClk,
     wrMask, {wrPtr, wrOffset}, wrData,
     {rdPtr, rdOffset}, rdData
@@ -97,7 +97,7 @@ module example_consumer_tb;
       x = 0;
       for (int j = 0; j < 8; j = j + 1) begin
         for (int i = 0; i < C2F_CHUNKSIZE/8; i = i + 1) begin
-          doWrite(i, dvr_rng_pkg::SEQ64[x]);
+          doWrite(i, makestuff_dvr_rng_pkg::SEQ64[x]);
           x = x + 1;
         end
         wrPtr = wrPtr + 1;

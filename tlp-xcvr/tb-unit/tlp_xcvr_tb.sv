@@ -20,7 +20,7 @@
 
 module tlp_xcvr_tb;
 
-  import tlp_xcvr_pkg::*;
+  import makestuff_tlp_xcvr_pkg::*;
 
   localparam int CLK_PERIOD = 10;
   `include "clocking-util.svh"
@@ -83,7 +83,7 @@ module tlp_xcvr_tb;
   localparam QWAddr C2FBASE_VALUE = 29'h1F00C0DE;
 
   // Instantiate transciever
-  tlp_xcvr uut(
+  makestuff_tlp_xcvr uut(
     sysClk, cfgBusDev,
     rxData, rxValid, rxReady, rxSOP, rxEOP,                          // CPU->FPGA messages
     txData, txValid, txReady, txSOP, txEOP,                          // FPGA->CPU messages
@@ -95,14 +95,14 @@ module tlp_xcvr_tb;
   );
 
   // RAM block to receive CPU->FPGA burst-writes
-  ram_sc_be#(C2F_SIZE_NBITS-3, 8) c2f_ram(
+  makestuff_ram_sc_be#(C2F_SIZE_NBITS-3, 8) c2f_ram(
     sysClk,
     c2fWrMask, {c2fWrPtr, c2fWrOffset}, c2fWrData,
     c2fRdAddr, c2fRdData
   );
 
   // Instantiate 64-bit random-number generator, as FPGA->CPU DMA data-source
-  dvr_rng64 rng(
+  makestuff_dvr_rng64 rng(
     .clk_in    (sysClk),
     .reset_in  (f2cReset),
     .data_out  (f2cData),
@@ -141,7 +141,7 @@ module tlp_xcvr_tb;
     rxSOP = SOP_NONE;
     if (dstAddr & 1) begin
       // Unaligned write
-      rxData = genDmaWrite1(dstAddr, dvr_rng_pkg::SEQ32[index]);
+      rxData = genDmaWrite1(dstAddr, makestuff_dvr_rng_pkg::SEQ32[index]);
       index = index + 1;
       dwCount = dwCount - 1;
     end else begin
@@ -150,13 +150,13 @@ module tlp_xcvr_tb;
     end
     while (dwCount >= 2) begin
       @(posedge sysClk);
-      rxData = {dvr_rng_pkg::SEQ32[index+1], dvr_rng_pkg::SEQ32[index]};
+      rxData = {makestuff_dvr_rng_pkg::SEQ32[index+1], makestuff_dvr_rng_pkg::SEQ32[index]};
       index = index + 2;
       dwCount = dwCount - 2;
     end
     if (dwCount == 1) begin
       @(posedge sysClk);
-      rxData = {32'h00000000, dvr_rng_pkg::SEQ32[index]};
+      rxData = {32'h00000000, makestuff_dvr_rng_pkg::SEQ32[index]};
     end
     rxEOP = 1;
     @(posedge sysClk);
@@ -207,9 +207,9 @@ module tlp_xcvr_tb;
 
       // Verify data of this TLP
       for (qw = 0; qw < F2C_TLPSIZE/8-1; qw = qw + 1) begin
-        expectTX(dvr_rng_pkg::SEQ64[chunk*F2C_CHUNKSIZE/8 + tlp*F2C_TLPSIZE/8 + qw], '1, 1, 0, 0);
+        expectTX(makestuff_dvr_rng_pkg::SEQ64[chunk*F2C_CHUNKSIZE/8 + tlp*F2C_TLPSIZE/8 + qw], '1, 1, 0, 0);
       end
-      expectTX(dvr_rng_pkg::SEQ64[chunk*F2C_CHUNKSIZE/8 + tlp*F2C_TLPSIZE/8 + qw], '1, 1, 0, 1);
+      expectTX(makestuff_dvr_rng_pkg::SEQ64[chunk*F2C_CHUNKSIZE/8 + tlp*F2C_TLPSIZE/8 + qw], '1, 1, 0, 1);
     end
 
     // Verify wrPtr send
@@ -262,8 +262,8 @@ module tlp_xcvr_tb;
       `FAIL_UNLESS_EQUAL($bits(RegRead), ACTION_BITS);
       `FAIL_UNLESS_EQUAL($bits(RegWrite), ACTION_BITS);
 
-      // Verify FPGA->CPU queue geometry: tlp_xcvr_pkg::F2C_CHUNKSIZE_NBITS must be greater than or
-      // equal to tlp_xcvr_pkg::F2C_TLPSIZE_NBITS; in other words, a chunk must be at least one TLP
+      // Verify FPGA->CPU queue geometry: makestuff_tlp_xcvr_pkg::F2C_CHUNKSIZE_NBITS must be greater than or
+      // equal to makestuff_tlp_xcvr_pkg::F2C_TLPSIZE_NBITS; in other words, a chunk must be at least one TLP
       `FAIL_IF(F2C_CHUNKSIZE_NBITS < F2C_TLPSIZE_NBITS);
     `SVTEST_END
 
@@ -271,10 +271,10 @@ module tlp_xcvr_tb;
     `SVTEST(register_readback)
       Data readValue;
       for (int i = 0; i < CTL_BASE; i = i + 1)
-        doWrite(i, dvr_rng_pkg::SEQ32[i]);
+        doWrite(i, makestuff_dvr_rng_pkg::SEQ32[i]);
       for (int i = 0; i < CTL_BASE; i = i + 1) begin
         doRead(i, readValue);
-        `FAIL_IF(readValue !== dvr_rng_pkg::SEQ32[i]);
+        `FAIL_IF(readValue !== makestuff_dvr_rng_pkg::SEQ32[i]);
       end
       for (int i = CTL_BASE; i < NUM_REGS; i = i + 1) begin
         doRead(i, readValue);

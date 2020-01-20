@@ -16,20 +16,20 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-module example_consumer(
+module makestuff_example_consumer(
     input logic sysClk_in,
-    input tlp_xcvr_pkg::C2FChunkPtr wrPtr_in,
-    input tlp_xcvr_pkg::C2FChunkPtr rdPtr_in,
+    input makestuff_tlp_xcvr_pkg::C2FChunkPtr wrPtr_in,
+    input makestuff_tlp_xcvr_pkg::C2FChunkPtr rdPtr_in,
     output logic dtAck_out,
-    output tlp_xcvr_pkg::C2FChunkOffset rdOffset_out,
-    input tlp_xcvr_pkg::uint64 rdData_in,
-    output tlp_xcvr_pkg::uint64 csData_out,
+    output makestuff_tlp_xcvr_pkg::C2FChunkOffset rdOffset_out,
+    input makestuff_tlp_xcvr_pkg::uint64 rdData_in,
+    output makestuff_tlp_xcvr_pkg::uint64 csData_out,
     output logic csValid_out,
     input logic csReset_in,
-    input tlp_xcvr_pkg::uint32 countInit_in  // either a number or example_consumer_pkg::DISABLE or example_consumer_pkg::GOBBLE.
+    input makestuff_tlp_xcvr_pkg::uint32 countInit_in  // either a number or example_consumer_pkg::DISABLE or example_consumer_pkg::GOBBLE.
   );
 
-  import tlp_xcvr_pkg::*;
+  import makestuff_tlp_xcvr_pkg::*;
 
   // Registers, etc
   typedef enum {
@@ -74,7 +74,7 @@ module example_consumer(
       S_READ0: begin
         ckSum_next = uint64'(ckSum + rdData_in);  // add QW[0] to the checksum
         rdOffset_out = 1;  // read address 1
-        if (tlp_xcvr_pkg::C2F_CHUNKSIZE_NBITS == 4) begin
+        if (makestuff_tlp_xcvr_pkg::C2F_CHUNKSIZE_NBITS == 4) begin
           state_next = S_READ2;
         end else begin
           state_next = S_READ1;
@@ -119,7 +119,7 @@ module example_consumer(
       S_IDLE: begin
         if (countInit_in != example_consumer_pkg::DISABLED && wrPtr_in != rdPtr_in) begin
           rdOffset_out = '0;  // read address zero
-          if (tlp_xcvr_pkg::C2F_CHUNKSIZE_NBITS == 3)
+          if (makestuff_tlp_xcvr_pkg::C2F_CHUNKSIZE_NBITS == 3)
             state_next = S_READ2;
           else
             state_next = S_READ0;

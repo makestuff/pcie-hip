@@ -16,31 +16,31 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-module tlp_recv(
+module makestuff_tlp_recv(
     // Clock, config & interrupt signals
     input logic pcieClk_in,  // 125MHz core clock from PCIe PLL
 
     // Incoming messages from the CPU
-    input tlp_xcvr_pkg::uint64 rxData_in,
+    input makestuff_tlp_xcvr_pkg::uint64 rxData_in,
     input logic rxValid_in,
     output logic rxReady_out,
-    input tlp_xcvr_pkg::SopBar rxSOP_in,
+    input makestuff_tlp_xcvr_pkg::SopBar rxSOP_in,
     input logic rxEOP_in,
 
     // Action FIFO, telling the tlp_send module what to do
-    output tlp_xcvr_pkg::Action actData_out,
+    output makestuff_tlp_xcvr_pkg::Action actData_out,
     output logic actValid_out,
 
     // The memory-mapped CPU->FPGA pipe
-    output tlp_xcvr_pkg::ByteMask64 c2fWrMask_out,
-    output tlp_xcvr_pkg::C2FChunkPtr c2fWrPtr_out,
-    output tlp_xcvr_pkg::C2FChunkOffset c2fWrOffset_out,
-    output tlp_xcvr_pkg::uint64 c2fWrData_out,
+    output makestuff_tlp_xcvr_pkg::ByteMask64 c2fWrMask_out,
+    output makestuff_tlp_xcvr_pkg::C2FChunkPtr c2fWrPtr_out,
+    output makestuff_tlp_xcvr_pkg::C2FChunkOffset c2fWrOffset_out,
+    output makestuff_tlp_xcvr_pkg::uint64 c2fWrData_out,
     input logic c2fReset_in
   );
 
   // Get stuff from the associated package
-  import tlp_xcvr_pkg::*;
+  import makestuff_tlp_xcvr_pkg::*;
 
   // FSM states
   typedef enum {
