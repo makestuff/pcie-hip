@@ -1,0 +1,2 @@
+## Example definition file
+In order for the communication between software and hardware to work, both need to agree on various definitions: register indexes, the size and layout of the circular buffers, etc. Ideally the software would retrieve this information from the hardware at startup, but for now they just share a definition file. You want a file like this in your application directory, so it can be included by the package `makestuff_tlp_xcvr_pkg`.

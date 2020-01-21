@@ -1,0 +1,4 @@
+## TLP Transceiver
+The PCIe hard-IP supplied by Altera is just a bidirectional wide pipe for PCIe data, which allows you to send and receive raw TLP packets. The form of these TLPs is specified by the PCIe specification, and is nontrivial. Hence, some logic is required to implement a layer of abstraction on top of this hard-IP in order to provide useful features such as register reads/writes and bidirectional circular-buffers for exchanging data with the CPU. This is that abstraction-layer.
+
+**Dependencies:** [`makestuff/block-ram`](https://github.com/makestuff/block-ram), [`makestuff/dvr-rng`](https://github.com/makestuff/dvr-rng).
