@@ -1,8 +1,6 @@
 ## Stratix V PCI-Express hard-IP
 The low-level PCI-Express hard-IP for Stratix V, provided by Altera.
 
-**Dependencies:** [`makestuff/altera-libs`](https://github.com/makestuff/altera-libs), [`makestuff/buffer-fifo`](https://github.com/makestuff/buffer-fifo).
-
 The `pcie_sv.qsys` QSys design was based on an Altera PCIe design example. To create it, I just did this:
 
     cp $ALTERA/ip/altera/altera_pcie/altera_pcie_hip_ast_ed/example_design/sv/pcie_de_gen1_x4_ast64.qsys pcie_sv.qsys

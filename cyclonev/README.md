@@ -1,8 +1,6 @@
 ## Cyclone V PCI-Express hard-IP
 The low-level PCI-Express hard-IP for Cyclone V, provided by Altera.
 
-**Dependencies:** [`makestuff/altera-libs`](https://github.com/makestuff/altera-libs), [`makestuff/buffer-fifo`](https://github.com/makestuff/buffer-fifo).
-
 The `pcie_cv.qsys` QSys design is based on an Altera PCIe design example. To create it, I just did this:
 
     cp $ALTERA/ip/altera/altera_pcie/altera_pcie_hip_ast_ed/example_design/cv/pcie_de_gen1_x4_ast64.qsys pcie_cv.qsys
