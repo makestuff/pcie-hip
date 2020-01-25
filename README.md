@@ -1,7 +1,7 @@
 ## Altera PCI-Express hard-IP
 You can git submodule this repo to provide user-friendly layer on top of th Intel/Altera PCI-Express hard-IP for Cyclone V and Stratix V. See [`altera-pcie`](https://github.com/makestuff/altera-pcie) repo for an example of how to do this.
 
-**Dependencies:** [`makestuff/altera-libs`](https://github.com/makestuff/altera-libs), [`makestuff/buffer-fifo`](https://github.com/makestuff/buffer-fifo), [`makestuff/block-ram`](https://github.com/makestuff/block-ram), [`makestuff/dvr-rng`](https://github.com/makestuff/dvr-rng).
+**Dependencies:** [`makestuff:altera-libs`](https://github.com/makestuff/altera-libs) [`makestuff:buffer-fifo`](https://github.com/makestuff/buffer-fifo) [`makestuff:block-ram`](https://github.com/makestuff/block-ram) [`makestuff:dvr-rng`](https://github.com/makestuff/dvr-rng)
 
 You need to add either the [`cyclonev`](cyclonev/pcie.qip) or the [`stratixv`](stratixv/pcie.qip) QIP file to your project's `.qsf`. This will import both the FPGA-specific hard-IP and the FPGA-agnostic [TLP transceiver](tlp-xcvr). You will also need a (possibly modified) copy of the [`defs.vh`](example-defs/defs.vh) file in your project directory, and a Makefile rule similar to this:
 
