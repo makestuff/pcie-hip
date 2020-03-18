@@ -1,7 +1,7 @@
 ## Altera PCI-Express hard-IP
 You can git submodule this repo to provide user-friendly layer on top of th Intel/Altera PCI-Express hard-IP for Cyclone V and Stratix V.
 
-**Dependencies:** [`makestuff:altera-libs`](https://github.com/makestuff/altera-libs) [`makestuff:buffer-fifo`](https://github.com/makestuff/buffer-fifo) [`makestuff:block-ram`](https://github.com/makestuff/block-ram) [`makestuff:dvr-rng`](https://github.com/makestuff/dvr-rng)
+**Dependencies:** [`makestuff:altera-libs`](https://github.com/makestuff/altera-libs), [`makestuff:buffer-fifo`](https://github.com/makestuff/buffer-fifo), [`makestuff:block-ram`](https://github.com/makestuff/block-ram), [`makestuff:dvr-rng`](https://github.com/makestuff/dvr-rng).
 
 See [BuildInfra](https://github.com/makestuff/ws-tools/blob/master/README.md) for details of how to incorporate this into your project, and [`altera-pcie`](https://github.com/makestuff/altera-pcie) repo for an example project repo which incorprates submodules of this repo and its dependencies.
 
